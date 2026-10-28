@@ -818,22 +818,24 @@
   }
 
   async function setNativeMiniWindow(mini) {
-    const tauriWindow = window.__TAURI__ && window.__TAURI__.window;
-    if (!tauriWindow || !tauriWindow.getCurrentWindow) return;
+    const tauri = window.__TAURI__;
+    const tauriWindow = tauri && tauri.window;
+    const tauriDpi = tauri && tauri.dpi;
+    if (!tauriWindow || !tauriDpi || !tauriWindow.getCurrentWindow) return;
     const appWindow = tauriWindow.getCurrentWindow();
     try {
       if (mini) {
-        await appWindow.setSize(new tauriWindow.PhysicalSize(260, 170));
+        await appWindow.setSize(new tauriDpi.PhysicalSize(260, 170));
         const monitor = await appWindow.currentMonitor();
         if (monitor) {
           const gap = 16;
           const x = monitor.position.x + monitor.size.width - 260 - gap;
           const y = monitor.position.y + monitor.size.height - 170 - gap;
-          await appWindow.setPosition(new tauriWindow.PhysicalPosition(x, y));
+          await appWindow.setPosition(new tauriDpi.PhysicalPosition(x, y));
         }
         await appWindow.setAlwaysOnTop(true);
       } else {
-        await appWindow.setSize(new tauriWindow.PhysicalSize(400, 620));
+        await appWindow.setSize(new tauriDpi.PhysicalSize(400, 620));
         await appWindow.center();
         await appWindow.setAlwaysOnTop(false);
       }
