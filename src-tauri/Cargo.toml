@@ -1,6 +1,6 @@
 [package]
 name = "mokpyo-jipjung"
-version = "0.1.2"
+version = "0.1.4"
 description = "Success Timer Windows desktop app"
 authors = ["KH Cha"]
 edition = "2021"

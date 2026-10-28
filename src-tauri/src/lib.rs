@@ -1,5 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 /// Tauri boundary for the single-window Success Timer desktop app.
 #[tauri::command]
 fn app_name() -> &'static str {

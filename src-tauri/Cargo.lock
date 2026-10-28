@@ -1792,7 +1792,7 @@ dependencies = [
 
 [[package]]
 name = "mokpyo-jipjung"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "focus-return-core",
  "serde",

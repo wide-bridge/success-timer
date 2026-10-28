@@ -3,5 +3,12 @@
   "identifier": "default",
   "description": "Main window permissions for Success Timer",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-size",
+    "core:window:allow-set-min-size",
+    "core:window:allow-set-position",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-center"
+  ]
 }
