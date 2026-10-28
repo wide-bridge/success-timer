@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-/// Minimal Tauri boundary. Timer commands will call focus-return-core after the
-/// Windows toolchain is available; the UI remains usable as a browser preview.
+/// Tauri boundary for the single-window Success Timer desktop app.
 #[tauri::command]
 fn app_name() -> &'static str {
     "Success Timer"
@@ -36,6 +35,6 @@ fn single_instance() -> bool {
     }
     // Keep the mutex alive for the lifetime of this process. Windows releases
     // it automatically when the process exits.
-    std::mem::forget(handle);
+    let _keep_handle = handle;
     true
 }
