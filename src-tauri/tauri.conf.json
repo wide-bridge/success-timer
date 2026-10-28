@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Success Timer",
+  "version": "0.1.0",
+  "identifier": "com.widebridge.mokpyo-jipjung",
+  "build": {
+    "frontendDist": "../preview",
+    "devUrl": "http://127.0.0.1:5187/"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Success Timer",
+        "width": 400,
+        "height": 620,
+        "minWidth": 280,
+        "minHeight": 150,
+        "resizable": true,
+        "visible": true
+      }
+    ],
+    "withGlobalTauri": true,
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://127.0.0.1:5187"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}
