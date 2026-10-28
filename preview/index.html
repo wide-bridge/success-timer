@@ -168,6 +168,7 @@
   .mini .row > .btn { flex: 1 1 auto; }
   .mini .banner { margin: 0; padding: 6px 8px; font-size: 13px; }
   .is-mini .preview-banner, .is-mini .mini-label, .is-mini .review { display: none !important; }
+  .is-native .preview-banner, .is-native .review { display: none !important; }
   .is-mini .layout { width: 240px; grid-template-columns: 240px; padding: 8px; margin: 0 auto; }
   .is-mini .mini-wrap { gap: 0; }
   .is-mini .mini { width: 100%; max-width: 100%; min-height: 0; padding: 8px; gap: 4px; background: #dededc; border-color: #343432; color: #111; cursor: move; }
@@ -493,6 +494,9 @@
 <script>
 (() => {
   'use strict';
+
+  const runningInTauri = !!(window.__TAURI__ && window.__TAURI__.window);
+  if (runningInTauri) document.body.classList.add('is-native');
 
   // ---------- 저장 ----------
   const KEY = 'focusReturn.preview.v1';
