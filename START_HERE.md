@@ -5,7 +5,7 @@
 현재 단계는 1단계 화면 시안이다. Tauri MVP는 다음 단계의 최종 목표이며 지금 구현할 범위가 아니다. 아래 내용이 이전의 전체 MVP 착수 지시를 대체한다.
 
 ```text
-D:\vibe_coding\ai_fit\day09_pc_app\focus-return 폴더에서 Windows용 Tauri 2 앱 ‘목표, 집중’을 구현해 줘.
+D:\vibe_coding\ai_fit\day09_pc_app\focus-return 폴더에서 Windows용 Tauri 2 앱 ‘Success Timer’을 구현해 줘.
 먼저 상위 AGENTS.md와 현재 폴더 CLAUDE.md, PRODUCT.md, DEVELOPMENT.md, ACCEPTANCE.md를 읽어.
 사용자는 시작한 뒤 다른 일로 자주 새기 때문에, 작업 한 줄을 계속 보여주고 딴생각을 맡긴 뒤 쉽게 복귀하는 흐름이 핵심이야.
 지금은 preview/index.html에 외부 의존성 없는 HTML/CSS/JavaScript 화면 시안을 먼저 구현해 줘.
@@ -17,3 +17,4 @@ D:\vibe_coding\ai_fit\day09_pc_app\focus-return 폴더에서 Windows용 Tauri 2 
 ```
 
 기획과 검토는 Codex, 구현은 Claude Code 담당이다. 같은 폴더에서 두 구현 세션을 동시에 실행하지 않는다. Codex가 실행한 CLI 작업과 VS Code 대화는 별도 세션이므로 자동으로 대화가 공유된다고 가정하지 않는다.
+

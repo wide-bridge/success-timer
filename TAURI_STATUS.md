@@ -14,7 +14,8 @@
 - `cargo test --manifest-path backend/Cargo.toml`: 48개 테스트 모두 통과했다.
 - `npm run tauri:dev`: Windows 개발 실행 파일이 빌드되고 실행됐다.
 - `npm run tauri:build`: NSIS 설치 프로그램을 생성했다.
-- 설치 파일: `src-tauri/target/release/bundle/nsis/목표, 집중_0.1.0_x64-setup.exe`
+- 기준 버전: **Success Timer 0.1.2**
+- 설치 파일: `src-tauri/target/release/bundle/nsis/Success Timer_0.1.2_x64-setup.exe`
 
 ## 아직 연결하지 않은 것
 
@@ -27,3 +28,4 @@
 2. `get_state`, `start`, `pause`, `resume`, `reset`, `capture_eureka`, `finish` IPC를 추가한다.
 3. preview의 localStorage adapter를 Tauri invoke/event adapter로 교체한다.
 4. 트레이·알림·완료 소리와 절전 복귀를 연결하고 Windows 설치본을 다시 검증한다.
+
