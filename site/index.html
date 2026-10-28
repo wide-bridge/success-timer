@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Success Timer</title>
+<meta name="description" content="딴 생각은 멈추고 핵심에 집중하게 돕는 Windows 집중 타이머">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800;900&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+  /* 레이아웃: 앱과 같은 먹색 화면 위에, 앱의 밝은 타이머 카드를 실물처럼 띄운다. 왼쪽 문장, 오른쪽 움직이는 앱. */
+  :root {
+    --bg: #ecebe7;
+    --surface: #f8f8f6;
+    --ink: #141413;
+    --muted: #5d5d58;
+    --line: #d0cfca;
+    --accent: #b9440f;
+    --accent-ink: #ffffff;
+    --app-bg: #0b0b0a;
+    --app-ink: #f2f2f0;
+    --app-muted: #a4a49e;
+    --app-btn: #242422;
+    --app-line: #383835;
+    --card: #dededc;
+    --card-ink: #111111;
+    --card-muted: #5a5a55;
+    --track: #b8b8b5;
+    --arc: #2878f0;
+    --mini-btn: #2f8f62;
+    --focus: #2878f0;
+    --bezel: #1c1c1b;
+    --stand: #2c2c2a;
+    --wall: #3e5a6e;
+    --display: "Gothic A1", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    --body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #070707; --surface: #121211; --ink: #f2f2f0; --muted: #a4a49e; --line: #2a2a27;
+      --accent: #d6561a; --accent-ink: #ffffff; --app-bg: #0b0b0a; --app-line: #33332f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #070707; --surface: #121211; --ink: #f2f2f0; --muted: #a4a49e; --line: #2a2a27;
+    --accent: #d6561a; --accent-ink: #ffffff; --app-bg: #0b0b0a; --app-line: #33332f;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.7; word-break: keep-all; overflow-wrap: break-word; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.04em; }
+  p { margin: 0; }
+
+  /* 상단 */
+  .top { padding-block: 22px; }
+  .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 17px; letter-spacing: -0.03em; }
+  .brand-mark { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); display: grid; place-items: center; }
+  .brand-mark i { width: 12px; height: 4px; border-radius: 2px; background: var(--accent-ink); }
+  .top nav { display: flex; gap: 20px; font-size: 14px; flex-wrap: wrap; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--ink); }
+
+  /* 히어로 */
+  .hero { padding-block: 40px 72px; }
+  .hero .wrap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); justify-items: center; align-items: center; gap: 48px; }
+  .hero-copy { display: grid; gap: 22px; min-width: 0; justify-items: center; text-align: center; }
+  .hero .lede { margin-inline: auto; }
+  .hero .facts, .hero .cta { justify-content: center; }
+  .hero .stage { width: 100%; }
+  .hero .monitor { max-width: 680px; }
+  .kicker { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; color: var(--accent); }
+  .hero h1 { font-size: clamp(28px, 5.2vw, 72px); font-weight: 900; line-height: 1.08; }
+  .hero h1 .line { display: block; white-space: nowrap; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .lede { font-size: 18px; color: var(--muted); max-width: 32em; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); padding: 0; margin: 0; list-style: none; }
+  .facts li { display: flex; align-items: center; gap: 8px; }
+  .facts li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .cta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-link { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 15px; }
+  .btn-link.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-link.ghost { border: 1px solid var(--line); color: var(--ink); }
+  .btn-link svg { width: 18px; height: 18px; margin-right: 8px; flex: none; }
+  .btn-link svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .dl-note { font-size: 13px; color: var(--muted); max-width: 34em; }
+  .dl-note a { color: var(--ink); }
+  .top nav a.dl { color: var(--accent); font-weight: 600; }
+
+  /* 앱 재현 */
+  .stage { display: grid; gap: 12px; justify-items: center; min-width: 0; }
+  .win { width: 100%; max-width: 380px; background: var(--app-bg); color: var(--app-ink); border-radius: 12px; border: 1px solid var(--app-line); overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,.55); }
+  .win-bar { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #f3f3f1; color: #222; font-size: 12px; font-family: "Segoe UI", var(--body); }
+  .win-bar .ico { width: 14px; height: 14px; border-radius: 3px; background: #111; display: grid; place-items: center; }
+  .win-bar .ico i { width: 8px; height: 3px; background: #f06a1c; border-radius: 1px; }
+  .win-bar .ctl { margin-left: auto; display: flex; gap: 18px; color: #555; letter-spacing: 0; }
+  .win-body { padding: 18px 16px 16px; display: grid; gap: 12px; }
+  .app-task-label { text-align: center; font-size: 13px; font-weight: 700; color: var(--app-ink); }
+  .app-task { text-align: center; font-family: var(--display); font-size: 22px; font-weight: 800; margin-top: -8px; overflow-wrap: anywhere; }
+  .card { background: var(--card); color: var(--card-ink); border-radius: 14px; padding: 16px 16px 12px; display: grid; gap: 2px; justify-items: center; }
+  .card-time { font-family: var(--display); font-weight: 800; font-size: 56px; letter-spacing: -0.05em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .card-state { font-size: 11px; color: var(--card-muted); }
+  .arc { width: 100%; height: auto; display: block; overflow: visible; margin-top: 6px; }
+  .arc path { fill: none; stroke-width: 10; stroke-linecap: round; }
+  .arc .track { stroke: var(--track); }
+  .arc .fill { stroke: var(--arc); transition: stroke-dasharray .3s linear; }
+  .card-meta { font-size: 11px; font-weight: 600; color: var(--card-muted); font-variant-numeric: tabular-nums; }
+  .card-meta strong { color: var(--card-ink); font-size: 12px; }
+  .card-elapsed { font-size: 10px; color: var(--card-muted); font-variant-numeric: tabular-nums; }
+  .app-btn { min-height: 42px; border-radius: 10px; border: 1px solid var(--app-line); background: var(--app-btn); color: var(--app-ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
+  .app-btn.eureka { background: #c84d12; border-color: #c84d12; color: #fff; }
+  .app-btn.quiet { background: transparent; color: var(--app-muted); font-weight: 500; }
+  .app-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .capture { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: #1a1a18; border: 1px solid var(--app-line); }
+  .capture label { font-size: 12px; color: var(--app-muted); }
+  .capture input { min-height: 40px; border-radius: 8px; border: 1px solid var(--app-line); background: #0f0f0e; color: var(--app-ink); padding: 0 10px; font: inherit; font-size: 14px; }
+  .count { text-align: center; font-size: 12px; color: var(--app-muted); }
+  .count strong { color: var(--app-ink); }
+
+  /* 미니 보기 재현 */
+  .mini { width: 244px; background: var(--card); color: var(--card-ink); border-radius: 10px; padding: 10px 10px 9px; display: grid; gap: 2px; justify-items: center; box-shadow: 0 18px 40px -20px rgba(0,0,0,.6); border: 1px solid #c4c4c1; }
+  .mini .t { font-size: 13px; font-weight: 700; }
+  .mini .card-time { font-size: 26px; }
+  .mini .arc { margin-top: 0; }
+  .mini .card-meta { font-size: 9px; }
+  .mini .card-meta strong { font-size: 10px; }
+  .mini .card-elapsed { font-size: 8px; }
+  .mini-row { display: flex; gap: 4px; margin-top: 4px; }
+  .mini-row button { width: 76px; min-height: 26px; border-radius: 7px; border: 0; background: var(--mini-btn); color: #fff; font: inherit; font-size: 10px; font-weight: 700; cursor: pointer; }
+  .switch { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); gap: 4px; }
+  .switch button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+  .switch button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .stage-note { font-size: 12px; color: var(--muted); text-align: center; }
+  /* 모니터 */
+  .monitor { width: 100%; max-width: 500px; }
+  .bezel { background: var(--bezel); border-radius: 12px; padding: 9px 9px 13px; box-shadow: 0 28px 50px -28px rgba(0,0,0,.6); }
+  .screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; border-radius: 3px; overflow: hidden; background: var(--wall); touch-action: none; }
+  .neck { width: 16%; height: 24px; margin: 0 auto; background: var(--stand); }
+  .foot { width: 38%; height: 8px; margin: 0 auto; border-radius: 6px 6px 2px 2px; background: var(--bezel); }
+  .doc-win { position: absolute; left: 5%; top: 6%; width: 64%; bottom: 20%; background: #fbfbfa; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.25); overflow: hidden; }
+  .doc-win .bar { height: 14px; background: #e9e9e6; display: flex; align-items: center; padding: 0 6px; font-size: 7px; color: #444; font-family: "Segoe UI", var(--body); white-space: nowrap; }
+  .doc-win .lines { display: grid; gap: 6px; padding: 10px 12px; }
+  .doc-win .lines i { display: block; height: 5px; border-radius: 3px; background: #d9d8d3; }
+  .doc-win .lines i.h { height: 8px; width: 45%; background: #a9a8a2; margin-bottom: 2px; }
+  .taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 22px; background: rgba(18,18,17,.92); display: flex; align-items: center; gap: 6px; padding: 0 8px; }
+  .taskbar i { width: 11px; height: 11px; border-radius: 3px; background: #5a5a56; }
+  .taskbar i.on { background: #f06a1c; }
+  .taskbar span { margin-left: auto; font-size: 8px; color: #d9d9d4; font-variant-numeric: tabular-nums; }
+  .slot { position: absolute; z-index: 1; border: 1.5px dashed rgba(255,255,255,.75); border-radius: 6px; background: rgba(20,40,60,.42); cursor: pointer; padding: 0; color: rgba(255,255,255,.8); font: inherit; font-size: 9px; font-weight: 600; }
+  .slot:hover { background: rgba(20,40,60,.6); }
+  .mini-win { position: absolute; width: 150px; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 24px rgba(0,0,0,.45); transition: left .35s ease, top .35s ease; z-index: 2; }
+  .mini-win.dragging { transition: none; }
+  .mw-bar { height: 15px; background: #f3f3f1; color: #222; display: flex; align-items: center; gap: 4px; padding: 0 6px; font-size: 7px; font-family: "Segoe UI", var(--body); cursor: grab; user-select: none; }
+  .mini-win.dragging .mw-bar { cursor: grabbing; }
+  .mw-bar .ico { width: 8px; height: 8px; border-radius: 2px; background: #111; }
+  .mw-bar .ctl { margin-left: auto; letter-spacing: 6px; color: #666; }
+  .pin { position: absolute; z-index: 3; font-size: 8px; font-weight: 700; color: #fff; background: var(--arc); border-radius: 4px; padding: 1px 5px; white-space: nowrap; transition: left .35s ease, top .35s ease; pointer-events: none; }
+  .mini.sm { width: 100%; border: 0; border-radius: 0; box-shadow: none; padding: 6px 6px 7px; gap: 0; }
+  .mini.sm .t { font-size: 9px; }
+  .mini.sm .card-time { font-size: 19px; }
+  .mini.sm .card-meta { font-size: 6.5px; }
+  .mini.sm .card-meta strong { font-size: 7px; }
+  .mini.sm .card-elapsed { font-size: 6px; }
+  .mini.sm .mini-row { margin-top: 3px; gap: 3px; }
+  .mini.sm .mini-row button { width: 54px; min-height: 17px; font-size: 7.5px; border-radius: 5px; }
+  .scene-help { font-size: 13px; color: var(--muted); text-align: center; }
+
+  /* 네 구석 썸네일 */
+  .corners { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+  .corners li { display: grid; gap: 8px; min-width: 0; }
+  .corners .bezel { padding: 5px 5px 7px; border-radius: 7px; box-shadow: none; }
+  .corners .doc-win { width: 70%; }
+  .corners .doc-win .bar { height: 7px; font-size: 0; }
+  .corners .doc-win .lines { gap: 4px; padding: 6px; }
+  .corners .doc-win .lines i { height: 3px; }
+  .corners .taskbar { height: 10px; padding: 0 4px; gap: 3px; }
+  .corners .taskbar i { width: 5px; height: 5px; border-radius: 1px; }
+  .tmini { position: absolute; width: 32%; border-radius: 3px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,.4); background: var(--card); color: var(--card-ink); display: grid; justify-items: center; padding-bottom: 4px; }
+  .tmini::before { content: ""; height: 5px; width: 100%; background: #f3f3f1; margin-bottom: 2px; }
+  .tmini b { font-family: var(--display); font-weight: 800; font-size: clamp(9px, 1.6vw, 14px); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .tmini i { width: 70%; height: 3px; border-radius: 2px; margin-top: 3px; background: linear-gradient(90deg, var(--arc) 14%, var(--track) 14%); }
+  .tmini.br { right: 4%; bottom: calc(10px + 5%); }
+  .tmini.tr { right: 4%; top: 5%; }
+  .tmini.bl { left: 4%; bottom: calc(10px + 5%); }
+  .tmini.tl { left: 4%; top: 5%; }
+  .corners .cap { font-size: 13px; color: var(--muted); }
+  .corners .cap strong { color: var(--ink); font-weight: 600; }
+
+  /* 섹션 */
+  section.block { padding-block: 72px; border-top: 1px solid var(--line); }
+  .sec-head { display: grid; gap: 12px; max-width: 52em; margin-bottom: 40px; }
+  .sec-head h2 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 800; line-height: 1.2; }
+  .sec-head p { color: var(--muted); }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; counter-reset: step; }
+  .steps li { display: grid; gap: 10px; align-content: start; padding-top: 18px; border-top: 2px solid var(--ink); counter-increment: step; min-width: 0; }
+  .steps li::before { content: counter(step); font-family: var(--display); font-weight: 900; font-size: 15px; color: var(--accent); }
+  .steps h3 { font-size: 21px; font-weight: 800; }
+  .steps p { color: var(--muted); font-size: 15px; }
+  .steps .btnname { display: inline-block; font-size: 13px; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+  .split .sec-head { margin-bottom: 0; }
+  .spec { display: grid; gap: 0; margin: 24px 0 0; }
+  .spec div { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .spec dt { color: var(--muted); }
+  .spec dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .nots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; list-style: none; margin: 0; padding: 0; }
+  .nots li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; padding-block: 18px; border-bottom: 1px solid var(--line); }
+  .nots svg { width: 22px; height: 22px; margin-top: 3px; }
+  .nots svg line { stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; }
+  .nots strong { display: block; font-size: 16px; }
+  .nots span { color: var(--muted); font-size: 14px; }
+
+  .closing { padding-block: 88px; border-top: 1px solid var(--line); }
+  .closing .wrap { display: grid; gap: 18px; justify-items: start; }
+  .closing h2 { font-size: clamp(30px, 4.6vw, 52px); font-weight: 900; line-height: 1.15; max-width: 16em; }
+  .closing p { color: var(--muted); max-width: 36em; }
+
+  footer { padding-block: 28px 40px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    .hero .wrap, .split { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .steps { grid-template-columns: minmax(0, 1fr); }
+    .nots { grid-template-columns: minmax(0, 1fr); }
+    .hero { padding-block: 16px 56px; }
+    .hero h1 { font-size: clamp(28px, 8.2vw, 64px); }
+  }
+  @media (max-width: 420px) {
+    .spec div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+    .card-time { font-size: 48px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .arc .fill { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i></span>Success Timer</div>
+    <nav aria-label="페이지 안내">
+      <a href="#how">사용 방법</a>
+      <a href="#mini">미니 보기</a>
+      <a href="#promise">하지 않는 것</a>
+      <a class="dl" href="#download">다운로드</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="kicker">WINDOWS 집중 복귀 타이머</p>
+        <h1><span class="line">딴 생각은 <em>Stop!</em></span><span class="line">핵심에 집중하세요.</span></h1>
+        <p class="lede">집중이 자주 끊겨도 괜찮습니다. Success Timer는 지금 하는 일을 화면에 남겨 두고, 떠오른 생각은 한 줄로 받아 두고, 다른 일을 하다 왔을 때 원래 할 일을 다시 보여줍니다.</p>
+        <ul class="facts">
+          <li>Windows 10·11</li>
+          <li>설치 파일 1.8MB</li>
+          <li>계정·인터넷 연결 필요 없음</li>
+        </ul>
+        <div class="cta" id="download">
+          <a class="btn-link primary" href="https://github.com/wide-bridge/success-timer/releases/download/v0.1.4/Success.Timer_0.1.4_x64-setup.exe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>Windows용 다운로드</a>
+          <a class="btn-link ghost" href="#how">사용방법</a>
+          <a class="btn-link ghost" href="#mini">미니보기</a>
+        </div>
+        <p class="dl-note">v0.1.4 · <a href="https://github.com/wide-bridge/success-timer/releases">모든 버전 보기</a><br>코드 서명 전이라 Windows가 ‘PC 보호’ 창을 띄울 수 있어요. ‘추가 정보’ → ‘실행’을 누르면 설치됩니다.</p>
+      </div>
+
+      <div class="stage">
+        <div class="switch" role="group" aria-label="앱 화면 고르기">
+          <button type="button" id="showFull" aria-pressed="true">기본 보기</button>
+          <button type="button" id="showMini" aria-pressed="false">미니 보기</button>
+        </div>
+
+        <div class="win" id="fullView" aria-label="Success Timer 기본 보기 재현">
+          <div class="win-bar" aria-hidden="true"><span class="ico"><i></i></span>Success Timer<span class="ctl"><span>—</span><span>☐</span><span>✕</span></span></div>
+          <div class="win-body">
+            <p class="app-task-label">지금 하는 일</p>
+            <p class="app-task">펫 헬스케어 시장 조사</p>
+            <div class="card">
+              <div class="card-time" id="time" role="timer" aria-label="남은 시간">30:00</div>
+              <div class="card-state" id="stateLabel">진행 중</div>
+              <svg class="arc" viewBox="0 0 240 48" aria-hidden="true">
+                <path class="track" d="M 10 42 Q 120 -14 230 42" pathLength="100"></path>
+                <path class="fill" d="M 10 42 Q 120 -14 230 42" pathLength="100"></path>
+              </svg>
+              <div class="card-meta">진행률 <strong class="pct">0.0%</strong></div>
+              <div class="card-elapsed elapsed">경과 00:00 / 30:00</div>
+            </div>
+            <form class="capture" id="capture" hidden>
+              <label for="captureInput">떠오른 생각을 한 줄로 적어 두세요. 타이머는 계속 갑니다.</label>
+              <input id="captureInput" maxlength="120" autocomplete="off" placeholder="예: 동물병원 예약 앱 경쟁사도 찾아보기">
+              <div class="app-row">
+                <button type="submit" class="app-btn eureka">맡기고 돌아가기</button>
+                <button type="button" class="app-btn" id="captureSkip">그냥 돌아가기</button>
+              </div>
+            </form>
+            <button type="button" class="app-btn eureka" id="openCapture">유레카 기록</button>
+            <p class="count" id="count">맡긴 생각 <strong>0</strong>건 · 세션이 끝나면 목록을 볼 수 있어요</p>
+            <div class="app-row">
+              <button type="button" class="app-btn" id="pause">일시정지</button>
+              <button type="button" class="app-btn quiet" id="reset">처음부터</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="monitor" id="miniView" hidden>
+          <div class="bezel">
+            <div class="screen" id="screen" aria-label="모니터 구석에 놓인 미니 보기 재현">
+              <div class="doc-win" aria-hidden="true">
+                <div class="bar">펫 헬스케어 시장 조사 메모 — 문서 편집기</div>
+                <div class="lines"><i class="h"></i><i style="width:92%"></i><i style="width:84%"></i><i style="width:96%"></i><i style="width:60%"></i><i style="width:88%"></i><i style="width:72%"></i></div>
+              </div>
+              <button type="button" class="slot" data-corner="tl" aria-label="왼쪽 위로 옮기기">왼쪽 위</button>
+              <button type="button" class="slot" data-corner="tr" aria-label="오른쪽 위로 옮기기">오른쪽 위</button>
+              <button type="button" class="slot" data-corner="bl" aria-label="왼쪽 아래로 옮기기">왼쪽 아래</button>
+              <button type="button" class="slot" data-corner="br" aria-label="오른쪽 아래로 옮기기">오른쪽 아래</button>
+              <span class="pin" id="pin" aria-hidden="true">항상 위</span>
+              <div class="mini-win" id="miniWin">
+                <div class="mw-bar" id="miniBar"><span class="ico"></span>Success Timer<span class="ctl">— ☐ ✕</span></div>
+          <div class="mini sm">
+            <div class="t">펫 헬스케어 시장 조사</div>
+            <div class="card-time" id="miniTime">30:00</div>
+            <svg class="arc" viewBox="0 0 240 48" aria-hidden="true">
+              <path class="track" d="M 10 42 Q 120 -14 230 42" pathLength="100"></path>
+              <path class="fill" d="M 10 42 Q 120 -14 230 42" pathLength="100"></path>
+            </svg>
+            <div class="card-meta">진행률 <strong class="pct">0.0%</strong></div>
+            <div class="card-elapsed elapsed">경과 00:00 / 30:00</div>
+            <div class="mini-row">
+              <button type="button" id="miniPause">일시정지</button>
+              <button type="button" id="miniFull">기본 보기</button>
+            </div>
+          </div>
+              </div>
+              <div class="taskbar" aria-hidden="true"><i></i><i></i><i class="on"></i><i></i><span>오후 2:14</span></div>
+            </div>
+          </div>
+          <div class="neck" aria-hidden="true"></div>
+          <div class="foot" aria-hidden="true"></div>
+        </div>
+        <p class="scene-help" id="sceneHelp" hidden>미니 창의 제목 표시줄을 끌거나, 점선 자리를 눌러 옮겨 보세요.</p>
+        <p class="stage-note">실제 앱 화면을 재현한 데모입니다. 눌러 보세요. 시간은 10배 빠르게 흐릅니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">사용 방법</p>
+        <h2>시작, 기록, 복귀. 버튼 세 개면 됩니다.</h2>
+        <p>집중력이 떨어지는 순간 다시 집중할 수 있도록 돕습니다.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>할 일을 한 줄로 적고 시작</h3>
+          <p>‘앱 만들기’보다 ‘펫 헬스케어 시장 조사’처럼 작게 적으세요. 비워 두면 ‘무제’로 바로 시작합니다. 시간은 10·30·45분 또는 직접 1~120분.</p>
+        </li>
+        <li>
+          <h3>떠오른 생각은 맡겨 두기</h3>
+          <p>일하다 아이디어가 떠오르면 <span class="btnname">유레카 기록</span>을 누르고 한 줄만 적습니다. 그동안에도 타이머는 멈추지 않고, 목록은 세션이 끝난 뒤에 보여줍니다.</p>
+        </li>
+        <li>
+          <h3>딴 데 갔다 오면 다시 보기</h3>
+          <p><span class="btnname">다른 일을 하고 있었어요</span>를 누르면 원래 할 일과 돌아와서 할 첫 행동을 다시 보여줍니다. 이어서 집중하거나, 남은 세션을 끝내고 5분으로 새로 시작할 수 있습니다.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="mini">
+    <div class="wrap split">
+      <div class="sec-head">
+        <p class="kicker">미니 보기</p>
+        <h2>모니터 구석에 두고, 할 일은 계속 보이게.</h2>
+        <p>미니 보기로 바꾸면 창이 타이머 카드 크기로 줄어 모니터 오른쪽 아래에 붙고, 다른 창보다 위에 떠 있습니다. 작업 창을 가리지 않는 구석이 따로 있다면 제목 표시줄을 끌어 옮기면 됩니다.</p>
+        <dl class="spec">
+          <div><dt>처음 위치</dt><dd>모니터 오른쪽 아래, 작업 표시줄 바로 위</dd></div>
+          <div><dt>옮기기</dt><dd>제목 표시줄을 끌어 원하는 구석으로</dd></div>
+          <div><dt>보이는 것</dt><dd>지금 할 일 · 남은 시간 · 진행률</dd></div>
+          <div><dt>바로 할 수 있는 것</dt><dd>일시정지 · 기본 보기로 돌아가기</dd></div>
+          <div><dt>창 크기</dt><dd>카드 크기 그대로, 빈 여백 없음</dd></div>
+          <div><dt>화면 배율</dt><dd>100·125·150% 배율에서도 같은 크기로 보임</dd></div>
+        </dl>
+      </div>
+      <ul class="corners" aria-label="미니 보기를 둘 수 있는 모니터 구석">
+        <li>
+          <div class="bezel" aria-hidden="true"><div class="screen"><div class="doc-win" style="left:auto;right:5%"><div class="bar"></div><div class="lines"><i style="width:80%"></i><i style="width:94%"></i><i style="width:66%"></i><i style="width:88%"></i></div></div><div class="tmini tl"><b>25:49</b><i></i></div><div class="taskbar"><i></i><i class="on"></i><i></i></div></div></div>
+          <p class="cap"><strong>왼쪽 위</strong> · 오른쪽에 넓은 창을 둘 때</p>
+        </li>
+        <li>
+          <div class="bezel" aria-hidden="true"><div class="screen"><div class="doc-win"><div class="bar"></div><div class="lines"><i style="width:80%"></i><i style="width:94%"></i><i style="width:66%"></i><i style="width:88%"></i></div></div><div class="tmini tr"><b>25:49</b><i></i></div><div class="taskbar"><i></i><i class="on"></i><i></i></div></div></div>
+          <p class="cap"><strong>오른쪽 위</strong> · 시계처럼 눈에 들어오게</p>
+        </li>
+        <li>
+          <div class="bezel" aria-hidden="true"><div class="screen"><div class="doc-win" style="left:auto;right:5%"><div class="bar"></div><div class="lines"><i style="width:80%"></i><i style="width:94%"></i><i style="width:66%"></i><i style="width:88%"></i></div></div><div class="tmini bl"><b>25:49</b><i></i></div><div class="taskbar"><i></i><i class="on"></i><i></i></div></div></div>
+          <p class="cap"><strong>왼쪽 아래</strong> · 오른쪽에 메신저를 둘 때</p>
+        </li>
+        <li>
+          <div class="bezel" aria-hidden="true"><div class="screen"><div class="doc-win"><div class="bar"></div><div class="lines"><i style="width:80%"></i><i style="width:94%"></i><i style="width:66%"></i><i style="width:88%"></i></div></div><div class="tmini br"><b>25:49</b><i></i></div><div class="taskbar"><i></i><i class="on"></i><i></i></div></div></div>
+          <p class="cap"><strong>오른쪽 아래</strong> · 처음 놓이는 자리</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="promise">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">하지 않는 것</p>
+        <h2>감시하지 않고, 점수 매기지 않습니다.</h2>
+        <p>Success Timer는 일을 대신 통제하는 도구가 아닙니다. 돌아올 자리를 보여주는 데서 멈춥니다.</p>
+      </div>
+      <ul class="nots">
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><line x1="5" y1="5" x2="17" y2="17"></line><line x1="17" y1="5" x2="5" y2="17"></line></svg><div><strong>화면·키보드·다른 앱을 보지 않습니다</strong><span>무엇을 하고 있었는지는 직접 눌러서 알려 줄 때만 압니다.</span></div></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><line x1="5" y1="5" x2="17" y2="17"></line><line x1="17" y1="5" x2="5" y2="17"></line></svg><div><strong>웹사이트를 막지 않습니다</strong><span>강제 전체화면도 없습니다. 언제든 창을 닫으면 끝납니다.</span></div></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><line x1="5" y1="5" x2="17" y2="17"></line><line x1="17" y1="5" x2="5" y2="17"></line></svg><div><strong>연속 기록, 벌점, 순위가 없습니다</strong><span>다른 일을 하다 돌아와도 실패로 표시하지 않습니다.</span></div></li>
+        <li><svg viewBox="0 0 22 22" aria-hidden="true"><line x1="5" y1="5" x2="17" y2="17"></line><line x1="17" y1="5" x2="5" y2="17"></line></svg><div><strong>내 기록을 밖으로 보내지 않습니다</strong><span>할 일과 맡긴 생각은 이 PC에만 저장되고, 한 번에 지울 수 있습니다.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <h2>다른 생각은 잠깐 멈추고 목표에 집중하세요.</h2>
+      <p>휴식은 원할 때만. 세션이 끝나면 3분 쉬기를 고를 수 있지만 저절로 시작하지는 않습니다. 다음 작은 행동을 적어 두면 다음 세션의 할 일 칸에 미리 채워집니다.</p>
+      <a class="btn-link primary" href="https://github.com/wide-bridge/success-timer/releases/download/v0.1.4/Success.Timer_0.1.4_x64-setup.exe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>Windows용 다운로드</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Success Timer v0.1.4 · Windows 데스크톱 앱</span>
+    <span>만든 사람 KH Cha · 함께 만든 도구 Codex, Claude Code</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const TOTAL = 30 * 60;
+  const SPEED = 10;
+  let elapsed = 48;
+  let running = true;
+  let last = performance.now();
+  let captured = 0;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (s) => {
+    s = Math.max(0, Math.round(s));
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  };
+  const demoFills = document.querySelectorAll('#fullView .fill, #miniView .fill');
+  const pcts = document.querySelectorAll('#fullView .pct, #miniView .pct');
+  const elapsedEls = document.querySelectorAll('#fullView .elapsed, #miniView .elapsed');
+
+  function draw() {
+    const left = TOTAL - elapsed;
+    const ratio = Math.min(1, elapsed / TOTAL);
+    $('time').textContent = fmt(left);
+    $('miniTime').textContent = fmt(left);
+    demoFills.forEach((p) => {
+      // 빈 구간을 경로 길이(100)보다 훨씬 길게 두어 대시가 반복되지 않게 한다.
+      p.style.strokeDasharray = (ratio * 100).toFixed(2) + ' 1000';
+      p.style.opacity = ratio > 0 ? '1' : '0';
+    });
+    pcts.forEach((p) => { p.textContent = (ratio * 100).toFixed(1) + '%'; });
+    elapsedEls.forEach((p) => { p.textContent = '경과 ' + fmt(elapsed) + ' / 30:00'; });
+    $('stateLabel').textContent = left <= 0 ? '30분 세션을 마쳤어요' : running ? '진행 중' : '일시정지됨';
+    const label = running ? '일시정지' : '계속하기';
+    $('pause').textContent = label;
+    $('miniPause').textContent = label;
+  }
+
+  function tick(now) {
+    const dt = (now - last) / 1000;
+    last = now;
+    if (running && elapsed < TOTAL) elapsed = Math.min(TOTAL, elapsed + dt * SPEED);
+    if (elapsed >= TOTAL) running = false;
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  function togglePause() {
+    if (elapsed >= TOTAL) return;
+    running = !running;
+    draw();
+  }
+  $('pause').addEventListener('click', togglePause);
+  $('miniPause').addEventListener('click', togglePause);
+  $('reset').addEventListener('click', () => { elapsed = 0; running = true; draw(); });
+
+  function closeCapture() {
+    $('capture').hidden = true;
+    $('openCapture').hidden = false;
+    $('captureInput').value = '';
+    $('openCapture').focus();
+  }
+  $('openCapture').addEventListener('click', () => {
+    $('capture').hidden = false;
+    $('openCapture').hidden = true;
+    $('captureInput').focus();
+  });
+  $('capture').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if ($('captureInput').value.trim()) captured += 1;
+    $('count').innerHTML = '맡긴 생각 <strong>' + captured + '</strong>건 · 세션이 끝나면 목록을 볼 수 있어요';
+    closeCapture();
+  });
+  $('captureSkip').addEventListener('click', closeCapture);
+  $('captureInput').addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCapture(); });
+
+  // ---------- 모니터 위 미니 창 위치 ----------
+  const screen = $('screen');
+  const win = $('miniWin');
+  const pin = $('pin');
+  const GAP = 8, TASKBAR = 22;
+  let corner = 'br';
+  let free = null;
+
+  function cornerPos(c, w, h) {
+    const sw = screen.clientWidth, sh = screen.clientHeight;
+    return {
+      x: c[1] === 'l' ? GAP : sw - w - GAP,
+      y: c[0] === 't' ? GAP : sh - TASKBAR - h - GAP,
+    };
+  }
+  function clamp(p) {
+    const maxX = screen.clientWidth - win.offsetWidth;
+    const maxY = screen.clientHeight - TASKBAR - win.offsetHeight;
+    return { x: Math.max(0, Math.min(maxX, p.x)), y: Math.max(0, Math.min(maxY, p.y)) };
+  }
+  function layout() {
+    if (!screen.clientWidth) return;
+    const w = win.offsetWidth, h = win.offsetHeight;
+    document.querySelectorAll('.slot').forEach((g) => {
+      const p = cornerPos(g.dataset.corner, w, h);
+      Object.assign(g.style, { left: p.x + 'px', top: p.y + 'px', width: w + 'px', height: h + 'px' });
+    });
+    const p = free ? clamp(free) : cornerPos(corner, w, h);
+    win.style.left = p.x + 'px';
+    win.style.top = p.y + 'px';
+    pin.style.left = (p.x + 4) + 'px';
+    pin.style.top = (p.y > 20 ? p.y - 16 : p.y + h + 4) + 'px';
+  }
+  document.querySelectorAll('.slot').forEach((g) => {
+    g.addEventListener('click', () => { corner = g.dataset.corner; free = null; layout(); });
+  });
+  $('miniBar').addEventListener('pointerdown', (e) => {
+    const start = { x: e.clientX, y: e.clientY, left: win.offsetLeft, top: win.offsetTop };
+    win.classList.add('dragging');
+    $('miniBar').setPointerCapture(e.pointerId);
+    const move = (ev) => {
+      free = clamp({ x: start.left + ev.clientX - start.x, y: start.top + ev.clientY - start.y });
+      layout();
+    };
+    const up = () => {
+      win.classList.remove('dragging');
+      $('miniBar').removeEventListener('pointermove', move);
+      $('miniBar').removeEventListener('pointerup', up);
+      $('miniBar').removeEventListener('pointercancel', up);
+    };
+    $('miniBar').addEventListener('pointermove', move);
+    $('miniBar').addEventListener('pointerup', up);
+    $('miniBar').addEventListener('pointercancel', up);
+  });
+  window.addEventListener('resize', layout);
+
+  function setView(mini) {
+    $('fullView').hidden = mini;
+    $('miniView').hidden = !mini;
+    $('sceneHelp').hidden = !mini;
+    if (mini) layout();
+    $('showFull').setAttribute('aria-pressed', String(!mini));
+    $('showMini').setAttribute('aria-pressed', String(mini));
+  }
+  $('showFull').addEventListener('click', () => setView(false));
+  $('showMini').addEventListener('click', () => setView(true));
+  $('miniFull').addEventListener('click', () => { setView(false); $('showFull').focus(); });
+
+  draw();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
